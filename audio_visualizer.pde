@@ -17,9 +17,9 @@ FFT fft;
 BeatDetect beat;
 float[][] data = new float[200][100];
 
-float cx = 0, cy = 0, cz = 0, cd = 0;
-float dx, dy, dz, dd, count = 0;
-float moveStep = 100;
+boolean line = false;
+
+ArrayList<CameraState> cameraPosition = new ArrayList<CameraState>();
 
 void setup() {
   size(1000, 1000, P3D);
@@ -44,8 +44,6 @@ void draw() {
   fft.forward(player.mix);
   beat.detect(player.mix);
   
-  if(count != 0) moveCameraTarget();
-  
   for(int i = 199; i > 0; i--) {
     for(int j = 99; j > 0; j--) {
       data[i][j] = data[i-1][j];
@@ -62,7 +60,7 @@ void draw() {
   translate(width/2 - 200, height/2 - 100, 0);
   for(int i = 0; i < 200; i++) {
     for(int j = 0; j < 100; j++) {
-      if(beat.isKick()){
+      if(beat.isKick() || line){
         vertex(i * 2, j * 2, data[i][j]);
       }else{
         point(i * 2, j * 2, data[i][j]);
@@ -74,36 +72,39 @@ void draw() {
   
   cam.beginHUD();
   text(cam.getRotations()[0] + " , " + cam.getRotations()[1] + " , " + cam.getRotations()[2], 100, 100);
-  text("Dis: " + cam.getDistance(),100, 150);
+  text("Dis: " + cam.getDistance(),100, 120);
   cam.endHUD();
 }
 
 void keyPressed() {
   switch(key) {
+    case ' ':
+      line = true;
+      break;
     case '1':
-      float[] target = {0, 0, 0, 500};
-      cx = cam.getRotations()[0] - target[0];
-      cy = cam.getRotations()[1] - target[1];
-      cz = cam.getRotations()[2] - target[2];
-      cd = (float)cam.getDistance();
-      dx = cx / moveStep;
-      dy = cy / moveStep;
-      dz = cz / moveStep;
-      dd = (cd - target[3]) / moveStep;
-      
-      count = 100;
-      
+      cam.reset(1000);
+   
+      break;
+    case '2':
+      if(cameraPosition.size() >= 1){
+        cam.setState(cameraPosition.get(0),1000);
+      }
       break;
   }
 }
 
-void moveCameraTarget() {
-  cx -= dx;
-  cy -= dy;
-  cz -= dz;
-  cd -= dd;
-    
-  cam.setRotations(cx, cy, cz);
-  cam.setDistance(cd);
-  count--;
+void keyReleased() {
+  switch(key) {
+    case ' ':
+      line = false;
+      break;
+  }
+}
+
+void mousePressed() {
+  switch(key) {
+    case '2':
+      cameraPosition.add(0, cam.getState());
+      break;
+  }
 }
