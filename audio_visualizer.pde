@@ -19,8 +19,6 @@ float[][] data = new float[200][100];
 
 boolean line = false;
 
-ArrayList<CameraState> cameraPosition = new ArrayList<CameraState>();
-
 void setup() {
   size(1000, 1000, P3D);
   pixelDensity(2);
@@ -53,12 +51,12 @@ void draw() {
   for(int j = 0; j < 100; j++) data[0][j] = fft.getBand(j);
   
   pushMatrix();
-  beginShape();
   stroke(255);
   strokeWeight(1.0);
-  noFill();
+  noFill(); 
   translate(width/2 - 200, height/2 - 100, 0);
   for(int i = 0; i < 200; i++) {
+    beginShape();
     for(int j = 0; j < 100; j++) {
       if(beat.isKick() || line){
         vertex(i * 2, j * 2, data[i][j]);
@@ -66,8 +64,8 @@ void draw() {
         point(i * 2, j * 2, data[i][j]);
       }
     }
+    endShape();
   }
-  endShape();
   popMatrix();
   
   cam.beginHUD();
@@ -81,14 +79,20 @@ void keyPressed() {
     case ' ':
       line = true;
       break;
-    case '1':
+    case 'w':
       cam.reset(1000);
-   
       break;
-    case '2':
-      if(cameraPosition.size() >= 1){
-        cam.setState(cameraPosition.get(0),1000);
-      }
+    case 's':
+      cam.setState(createCameraState(-1.5, 0, 0, 500),1000);
+      break;
+    case 'a':
+      cam.setState(createCameraState(0.55, -1.5, 2.1, 300),1000);
+      break;
+    case 'd':
+      cam.setState(createCameraState(-1.185, 1.5589, -0.385, 340),1000);
+      break;
+    case 'e':
+      cam.setState(createCameraState(-0.731, 0.6336, -0.6058, 515),1000);
       break;
   }
 }
@@ -103,8 +107,13 @@ void keyReleased() {
 
 void mousePressed() {
   switch(key) {
-    case '2':
-      cameraPosition.add(0, cam.getState());
-      break;
   }
+}
+
+CameraState createCameraState(float x, float y, float z, double distance) {
+  Rotation r = new Rotation(RotationOrder.XYZ, x, y, z);
+  float[] look = cam.getLookAt();
+  Vector3D v = new Vector3D(look[0], look[1], look[2]);
+  CameraState state = new CameraState(r, v, distance);
+  return state;
 }
