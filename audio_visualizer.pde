@@ -45,13 +45,15 @@ void draw() {
   fft.forward(player.mix);
   beat.detect(player.mix);
   
-  for(int i = 199; i > 0; i--) {
-    for(int j = 99; j > 0; j--) {
-      data[i][j] = data[i-1][j];
+  if(player.isPlaying()) {
+    for(int i = 199; i > 0; i--) {
+      for(int j = 99; j > 0; j--) {
+        data[i][j] = data[i-1][j];
+      }
     }
-  }
   
-  for(int j = 0; j < 100; j++) data[0][j] = fft.getBand(j);
+    for(int j = 0; j < 100; j++) data[0][j] = fft.getBand(j);
+  }
   
   pushMatrix();
   stroke(255);
@@ -82,10 +84,18 @@ void draw() {
 void keyPressed() {
   switch(key) {
     case 'p':
-      player.play();
+      if(player.isPlaying()) {
+        player.pause();
+      }else{
+        player.play();
+      }
       break;
     case ' ':
-      line = true;
+      if(line) {
+        line = false;
+      }else{
+        line = true;
+      }
       break;
     case '8':
       cam.reset(1000);
@@ -112,11 +122,11 @@ void keyPressed() {
 }
 
 void keyReleased() {
-  switch(key) {
-    case ' ':
-      line = false;
-      break;
-  }
+  //switch(key) {
+  //  case ' ':
+  //    line = false;
+  //    break;
+  //}
 }
 
 void mousePressed() {
